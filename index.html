@@ -1844,14 +1844,14 @@
     }
     .comments-filters{
       display:grid;
-      grid-template-columns:repeat(4, minmax(220px, 1fr));
+      grid-template-columns:repeat(5, minmax(180px, 1fr));
       gap:14px;
-      flex:1 1 920px;
+      flex:1 1 100%;
     }
     .filter-group{
       display:grid;
       gap:8px;
-      min-width:280px;
+      min-width:0;
     }
     .filter-group label{
       font-size:13px;
@@ -2325,10 +2325,9 @@
       <div class="section-head">
         <h2>Comentarios reales</h2>
       </div>
-      <div class="comments-card">
+        <div class="comments-card">
         <div class="card-header">
           <div class="card-title">Tabla din&aacute;mica de comentarios</div>
-          <div class="card-note">Filtra por subcategor&iacute;a normalizada para revisar el detalle textual de clientes desde todas las fuentes.</div>
         </div>
         <div class="comments-toolbar">
           <div class="comments-filters">
@@ -2356,10 +2355,16 @@
                 <option value="__all__">Todos los sistemas</option>
               </select>
             </div>
+            <div class="filter-group">
+              <label for="commentsRatingFilter">Nota</label>
+              <select class="filter-select" id="commentsRatingFilter">
+                <option value="__all__">Todas las notas</option>
+              </select>
+            </div>
           </div>
           <div class="comments-meta">
             <div class="comments-count" id="commentsCount">0 comentarios visibles</div>
-            <div class="comments-hint" id="commentsHint">Carga el Excel para generar el detalle din&aacute;mico de comentarios.</div>
+            <div class="comments-hint" id="commentsHint"></div>
           </div>
         </div>
         <div class="comments-table-wrap">
@@ -2433,6 +2438,7 @@
     var commentsTopFilter = document.getElementById('commentsTopFilter');
     var commentsSourceFilter = document.getElementById('commentsSourceFilter');
     var commentsOsFilter = document.getElementById('commentsOsFilter');
+    var commentsRatingFilter = document.getElementById('commentsRatingFilter');
     var issueExplorerNav = document.getElementById('issueExplorerNav');
     var trendSelector = document.getElementById('trendSelector');
 
@@ -3249,6 +3255,33 @@
         return cleanText(row.ID);
       });
       var surveyRows = XLSX.utils.sheet_to_json(workbook.Sheets['Encuestas calidad'], { header:1, defval:null, blankrows:true });
+      var extraBuzonRows = [
+        {
+          ID:'BZ-MANUAL-001',
+          Fecha:null,
+          Cat:'Funcionalidad',
+          'Subcategor\u00eda':'Modo Oscuro',
+          'Casu\u00edstica':'Modo oscuro eliminado',
+          Observaciones:'me han quitado el modo oscuro y ahora no queda bien con el sistema operativo'
+        },
+        {
+          ID:'BZ-MANUAL-002',
+          Fecha:null,
+          Cat:'Funcionalidad',
+          'Subcategor\u00eda':'Modo Oscuro',
+          'Casu\u00edstica':'Modo oscuro eliminado',
+          Observaciones:'por qu\u00e9 no est\u00e1 el dark mode en la ultima app'
+        },
+        {
+          ID:'BZ-MANUAL-003',
+          Fecha:null,
+          Cat:'Funcionalidad',
+          'Subcategor\u00eda':'Modo Oscuro',
+          'Casu\u00edstica':'Modo oscuro eliminado',
+          Observaciones:'Una basura que no tiene modod oscuro como la anterior'
+        }
+      ];
+      buzonRows = buzonRows.concat(extraBuzonRows);
       var extraSurveyComments = [
         'Muy poco usable. No recibes ninguna confirmación y en aplicación sigue apareciendo como contratado. Aún no se si se ha dado o no de baja. En la aplicación sigue apareciendo como contratado. Tengo el paquete Motor para ver la F1 y no hay carreras en 5 semanas.',
         'Para darte de alta muy bien, para darte de baja un dolor de cabeza, en la aplicación aún me dice que la tengo contratada. Precio y calidad del producto. Gratis o después de varios años contratando, haber ofrecido barato el servicio, como Netflix con anuncios.',
@@ -3393,6 +3426,7 @@
           issueTags:issueTags,
           issueColor:ISSUE_COLORS[issue] || '#5d6b89',
           os:'No aplica',
+          rating:null,
           category:category,
           comment:buildCommentText([row.Observaciones, row.Casu\u00edstica, row.Subcategor\u00eda])
         });
@@ -3443,6 +3477,7 @@
           issueTags:issueTags,
           issueColor:ISSUE_COLORS[issue] || '#5d6b89',
           os:osLabel,
+          rating:!isNaN(rating) && ratings[Math.round(rating)] !== undefined ? Math.round(rating) : null,
           category:category,
           comment:buildCommentText([row.Rese\u00f1a, row.Tipolog\u00eda])
         });
@@ -3494,6 +3529,7 @@
           issueTags:issueTags,
           issueColor:ISSUE_COLORS[issue] || '#5d6b89',
           os:'No aplica',
+          rating:null,
           category:category,
           comment:buildCommentText([row.Mensaje, row.Causa])
         });
@@ -3545,6 +3581,7 @@
             issueTags:issueTags,
             issueColor:ISSUE_COLORS[issue] || '#5d6b89',
             os:'No aplica',
+            rating:null,
             category:surveyCategory,
             comment:buildCommentText([cellValue])
           });
@@ -3599,6 +3636,7 @@
           issueTags:issueTags,
           issueColor:ISSUE_COLORS[issue] || '#5d6b89',
           os:'No aplica',
+          rating:null,
           category:surveyCategory,
           comment:buildCommentText([cellValue])
         });
@@ -4687,8 +4725,8 @@
       var items = [
         {
           priority:'P1',
-          slot:'junio',
-          target:'Junio',
+          slot:'mayo',
+          target:'Mayo',
           icon:'access',
           title:'Flujos de login y OTP de regeneración de contraseña',
           copy:'Revisar login, validaciones y recepción de códigos para reducir bloqueos de acceso y fricción en el alta.'
@@ -4753,8 +4791,8 @@
         },
         {
           priority:'P4',
-          slot:'junio',
-          target:'Junio',
+          slot:'septiembre',
+          target:'Septiembre',
           icon:'prepay',
           title:'Prepago UX nativa',
           copy:'Diseñar una experiencia nativa para prepago que simplifique consulta, recarga y navegación dentro de la app.'
@@ -4851,6 +4889,10 @@
 
     function renderConclusions(summary){
       var metrics = summary.actionMetrics;
+      var accessCategory = summary.categoryEntries.find(function(entry){
+        return entry.label === 'Problemas de Acceso';
+      }) || { value:0 };
+      var accessPct = summary.totalComments ? accessCategory.value / summary.totalComments * 100 : 0;
       var items = [
         {
           iconClass:'ir',
@@ -4862,7 +4904,7 @@
           iconClass:'ia',
           icon:'&#128273;',
           title:'El mayor punto de fricción se produce en el Acceso',
-          copy:'Fundamentalmente por el cierre de sesión masivo. La categoría representa el 26% del total, con 271 registros.'
+          copy:'Fundamentalmente por el cierre de sesión masivo. La categoría representa el ' + formatPercent(accessPct) + ' del total, con ' + formatNumber(accessCategory.value) + ' registros.'
         },
         {
           iconClass:'ib',
@@ -4918,6 +4960,13 @@
       }))).sort(function(a, b){
         return a.localeCompare(b, 'es');
       });
+      var ratingOptions = Array.from(new Set(currentComments.map(function(item){
+        return item.rating === null || item.rating === undefined ? '__none__' : String(item.rating);
+      }))).sort(function(a, b){
+        if(a === '__none__'){ return 1; }
+        if(b === '__none__'){ return -1; }
+        return Number(a) - Number(b);
+      });
 
       populateFilter(commentsFilter, categories, 'Todas las categorías');
       if(commentsFilter.value === '__all__' && categories.indexOf('Funcionalidad') !== -1){
@@ -4926,16 +4975,20 @@
       populateFilter(commentsTopFilter, currentTopIssues, 'Todas las del top');
       populateFilter(commentsSourceFilter, sources, 'Todas las fuentes');
       populateFilter(commentsOsFilter, operatingSystems, 'Todos los sistemas');
+      populateFilter(commentsRatingFilter, ratingOptions, 'Todas las notas', function(value){
+        return value === '__none__' ? 'Sin valoración' : value + ' estrellas';
+      });
 
-      document.getElementById('commentsHint').textContent = 'La tabla combina comentarios únicos de Buzón, markets, ITSM y encuestas, con duplicados eliminados.';
+      document.getElementById('commentsHint').textContent = '';
       updateCommentsTable();
     }
 
-    function populateFilter(select, values, allLabel){
+    function populateFilter(select, values, allLabel, formatLabel){
       var previous = select.value || '__all__';
       select.innerHTML = ['<option value="__all__">' + escapeHtml(allLabel) + '</option>'].concat(
         values.map(function(value){
-          return '<option value="' + escapeHtml(value) + '">' + escapeHtml(value) + '</option>';
+          var label = formatLabel ? formatLabel(value) : value;
+          return '<option value="' + escapeHtml(value) + '">' + escapeHtml(label) + '</option>';
         })
       ).join('');
       select.value = values.indexOf(previous) !== -1 ? previous : '__all__';
@@ -4946,13 +4999,16 @@
       var selectedTop = commentsTopFilter.value || '__all__';
       var selectedSource = commentsSourceFilter.value || '__all__';
       var selectedOs = commentsOsFilter.value || '__all__';
+      var selectedRating = commentsRatingFilter.value || '__all__';
       var filtered = currentComments.filter(function(item){
         var issueTags = item.issueTags || [item.issue];
         var matchesTop = selectedTop === '__all__' || issueTags.indexOf(selectedTop) !== -1;
+        var itemRating = item.rating === null || item.rating === undefined ? '__none__' : String(item.rating);
         return (selectedCategory === '__all__' || item.category === selectedCategory) &&
           matchesTop &&
           (selectedSource === '__all__' || item.source === selectedSource) &&
-          (selectedOs === '__all__' || item.os === selectedOs);
+          (selectedOs === '__all__' || item.os === selectedOs) &&
+          (selectedRating === '__all__' || itemRating === selectedRating);
       });
 
       document.getElementById('commentsCount').textContent = formatNumber(filtered.length) + ' comentarios visibles';
@@ -5028,6 +5084,7 @@
     commentsTopFilter.addEventListener('change', updateCommentsTable);
     commentsSourceFilter.addEventListener('change', updateCommentsTable);
     commentsOsFilter.addEventListener('change', updateCommentsTable);
+    commentsRatingFilter.addEventListener('change', updateCommentsTable);
     issueExplorerNav.addEventListener('click', function(event){
       var button = event.target.closest('[data-issue]');
       if(!button){ return; }
